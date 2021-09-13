@@ -9,7 +9,7 @@ if (process.env.DATABASE_URL) {
 }
 
 mongoose
-    .connect(mongoDB, {
+    .connect("mongodb://localhost:27017/emailverification", {
         useNewUrlParser: true,
         useUnifiedTopology: true,
         useCreateIndex: true,

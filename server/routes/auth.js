@@ -8,6 +8,7 @@ const { hash, compare } = require("../utils/bcrypt");
 const emailService = require("../utils/nodemailer");
 const authenticateTokenWhilePending = require("../utils/middleware/checkAuthWhilePending");
 const authenticateToken = require("../utils/middleware/checkAuth");
+const nodemailer = require("nodemailer");
 
 // #route:  POST /Login
 // #desc:   Login a user
@@ -152,6 +153,9 @@ router.post("/register", async (req, res) => {
                     text: `Please use the following link within the next 10 minutes to activate your account on YOUR APP: ${baseUrl}/api/auth/verification/verify-account/${user._id}/${secretCode}`,
                     html: `<p>Please use the following link within the next 10 minutes to activate your account on YOUR APP: <strong><a href="${baseUrl}/api/auth/verification/verify-account/${user._id}/${secretCode}" target="_blank">Email bestätigen</a></strong></p>`,
                 };
+
+                console.log("Sending");
+
                 await emailService.sendMail(data);
 
                 res.json({
@@ -180,6 +184,7 @@ router.get(
     async (req, res) => {
         const baseUrl = req.protocol + "://" + req.get("host");
 
+
         try {
             const user = await User.findById(req.userId);
 
@@ -196,14 +201,46 @@ router.get(
                     email: user.email,
                 });
                 await newCode.save();
+                console.log(res.locals.secrets.EMAIL_USERNAME,);
 
                 const data = {
-                    from: `YOUR NAME <${res.locals.secrets.EMAIL_USERNAME}>`,
+                    from: `bipinprjl@gmail.com`,
                     to: user.email,
                     subject: "Your Activation Link for YOUR APP",
                     text: `Please use the following link within the next 10 minutes to activate your account on YOUR APP: ${baseUrl}/api/auth/verification/verify-account/${user._id}/${secretCode}`,
                     html: `<p>Please use the following link within the next 10 minutes to activate your account on YOUR APP: <strong><a href="${baseUrl}/api/auth/verification/verify-account/${user._id}/${secretCode}" target="_blank">Email bestätigen</a></strong></p>`,
                 };
+                console.log("running");
+                // let mailTransporter = nodemailer.createTransport({
+                //     service: 'gmail',
+                //     auth: {
+                //         user: 'bipinprjl@gmail.com',
+                //         pass: 'Reactjs321'
+                //     }
+                // });
+                  
+                // let mailDetails = {
+                //     from: 'bipinprjl@gmail.com',
+                //     to: 'bipin0072@xavier.edu.np',
+                //     subject: 'Test mail',
+                //     text: 'Node.js testing mail for GeeksforGeeks'
+                // };
+                  
+                // mailTransporter.sendMail(mailDetails, function(err, data) {
+                //     if(err) {
+                //         console.log(err,'Error Occurs');
+                //     } else {
+                //         console.log('Email sent successfully');
+                //     }
+                // });
+                
+               await emailService.sendMail(data, function(err, data) {
+                    if(err) {
+                        console.log(err,'Error Occurs');
+                    } else {
+                        console.log('Email sent successfully');
+                    }
+                });
                 await emailService.sendMail(data);
 
                 res.json({ success: true });
